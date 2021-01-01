@@ -311,53 +311,56 @@ int main()
 					}
 				}
 
-				// apply accel
-				accelSens = var_sens;							// start with in-game sens so accel calc scales the same
-				if (var_accel > 0) {
-					rate = sqrt(dx*dx + dy*dy) / frameTime_ms;	// calculate velocity of mouse based on deltas
-					rate -= var_offset;							// offset affects the rate that accel sees
-					if (rate > 0) {
-						switch (var_accelMode) {
-						case 0:									//Original InterAccel acceleration
-							accelSens += pow((rate*var_accel), power);
-							break;
-						case 1:									//TauntyArmordillo's natural acceleration
-							accelSens += a - (a * exp((-rate*b)));
-							break;
-						case 2:									//Natural Log acceleration
-							accelSens += log((rate*var_accel) + 1);
-							break;
+				if (mstroke.state & INTERCEPTION_MOUSE_RIGHT_BUTTON_DOWN) {
+					// apply accel
+					accelSens = var_sens;							// start with in-game sens so accel calc scales the same
+					if (var_accel > 0) {
+						rate = sqrt(dx*dx + dy*dy) / frameTime_ms;	// calculate velocity of mouse based on deltas
+						rate -= var_offset;							// offset affects the rate that accel sees
+						if (rate > 0) {
+							switch (var_accelMode) {
+							case 0:									//Original InterAccel acceleration
+								accelSens += pow((rate*var_accel), power);
+								break;
+							case 1:									//TauntyArmordillo's natural acceleration
+								accelSens += a - (a * exp((-rate*b)));
+								break;
+							case 2:									//Natural Log acceleration
+								accelSens += log((rate*var_accel) + 1);
+								break;
+							}
 						}
-					}
 
-					if (debugOutput) {
-						coord.X = 40;
-						coord.Y = 8;
-						SetConsoleCursorPosition(hConsole, coord);
-					}
-
-					if (var_senscap > 0 && accelSens >= var_senscap) {
-						accelSens = var_senscap;				// clamp post-accel sensitivity at senscap
 						if (debugOutput) {
-							SetConsoleTextAttribute(hConsole, 0x2f);
-							printf("Capped");
+							coord.X = 40;
+							coord.Y = 8;
+							SetConsoleCursorPosition(hConsole, coord);
 						}
-					}
-					else {
+
+						if (var_senscap > 0 && accelSens >= var_senscap) {
+							accelSens = var_senscap;				// clamp post-accel sensitivity at senscap
+							if (debugOutput) {
+								SetConsoleTextAttribute(hConsole, 0x2f);
+								printf("Capped");
+							}
+						}
+						else {
+							if (debugOutput) {
+								printf("      ");
+							}
+						}
+
 						if (debugOutput) {
-							printf("      ");
+							SetConsoleTextAttribute(hConsole, 0x08);
 						}
+
+
 					}
 
-					if (debugOutput) {
-						SetConsoleTextAttribute(hConsole, 0x08);
-					}
-
-
+					accelSens /= var_sens;							// divide by in-game sens as game will multiply it out
+					dx *= accelSens;								// apply accel to horizontal
+					dy *= accelSens;
 				}
-				accelSens /= var_sens;							// divide by in-game sens as game will multiply it out
-				dx *= accelSens;								// apply accel to horizontal
-				dy *= accelSens;
 
 				// apply post-scale
 				dx *= var_postScaleX;
